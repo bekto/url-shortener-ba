@@ -11,22 +11,28 @@ const Url = require('../models/Url');
 // @desc    Create short url
 
 router.post('/shorten', async (req, res) => {
-    const { longUrl } = req.body;
-    const baseUrl = config.get('baseUrl');
+    const { longUrl, customUrl } = req.body;
+    const baseUrl = config.get('baseUrl'); //url of our website
+
 
     //check base url
     if (!validUrl.isUri(baseUrl)) {
         return res.status(401).json('Invalid base url!');
     }
     
-    //create url code 
-    let urlCode = shortid.generate();
+    //if we have custom url we wont create the random one 
+    let urlCode = '';
+    if(customUrl){
+        urlCode = customUrl;
+    }
+    else{
+        urlCode = shortid.generate();
+    }
     let usedCode = await Url.findOne({urlCode: urlCode});
     while (usedCode) {
         urlCode = shortid.generate();
         usedCode = await Url.findOne({urlCode: urlCode});
     }
-    
 
     // TODO: use the promises in code below 
     //check longUrl 
